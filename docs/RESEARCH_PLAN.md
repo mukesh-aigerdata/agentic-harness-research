@@ -260,9 +260,13 @@ Start small. Measure real usage in W2. Scale only when the numbers show a need.
 
 | Tier | Spec | Use |
 |---|---|---|
-| **Start here** | **8 vCPU, 16 GB RAM, 200 GB SSD** | 2–3 Workers at once; enough for W1–W5 |
-| Scale up (only if W2 measurements need it) | 16 vCPU, 32 GB RAM, 300 GB SSD | 5–6 Workers at once; W7 benchmarks |
+| **A. Starter (from zero)** | **4 vCPU, 16 GB RAM, 150 GB SSD**; Docker + gVisor | 1–2 Workers at once; W1–W3 |
+| B. Mid-range self-hosted test | 8 vCPU, 32 GB RAM, 300 GB NVMe, with `/dev/kvm` | 3–4 Workers at once; W4–W7; Kata/Firecracker trials |
+| C. Full production (split) | Control plane 4 vCPU/16 GB · DB managed Supabase or 4 vCPU/16 GB · sandbox nodes 16 vCPU/64 GB/500 GB NVMe with KVM (6–8 Workers each) · object storage | 8–16 Workers; add nodes to grow |
 | Alternative | 4 vCPU, 8 GB RAM + hosted sandboxes (E2B / Modal, pay per second) | Sandboxes run off the VM; VM runs only the harness and DB |
+
+Per-Worker budget (estimate, measure in W2): ~2 vCPU, ~3–4 GB RAM, ~8–10 GB disk.
+Full reasons: `docs/agent-core-session-report.pdf` §4.
 | Optional GPU (hourly rental) | 1× 24 GB GPU (e.g. L4) | Only for S3 training if CPU training is too slow |
 
 Disk drives cost more than CPU: each worktree has its own `node_modules`, plus Docker images and archived trajectories.

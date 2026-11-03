@@ -333,10 +333,12 @@ Full detail: `docs/RESEARCH_PLAN.md`. Assumes one engineer + Claude Code, start 
 The spec's 36 h estimate covers RIDGE-01..05 only. It excludes sandboxes, sessions, the Auditor, and ranker research.
 
 **VM:** LLMs run on external APIs, so no GPU. The VM runs installs, builds, tests, Chromium, and containers.
-- Start: 8 vCPU, 16 GB RAM, 200 GB SSD (2–3 Workers).
-- Scale only after W2 measurements: 16 vCPU, 32 GB RAM, 300 GB SSD (5–6 Workers).
+- Per Worker (estimate): ~2 vCPU, ~3–4 GB RAM, ~8–10 GB disk. Measure in W2.
+- **A. Starter (W1–W3):** 4 vCPU, 16 GB RAM, 150 GB SSD. Docker + gVisor. 1–2 Workers.
+- **B. Mid-range test (W4–W7):** 8 vCPU, 32 GB RAM, 300 GB NVMe, `/dev/kvm`. 3–4 Workers.
+- **C. Production (after MVP):** split cluster. Control plane 4 vCPU/16 GB, DB (managed Supabase), sandbox nodes 16 vCPU/64 GB/500 GB with KVM (6–8 Workers each), object storage.
 - Alternative: 4 vCPU, 8 GB + hosted sandboxes (E2B/Modal).
-- Need `/dev/kvm` later for Kata/Firecracker.
+- Move up a tier only when measurements show a need.
 
 ---
 
@@ -361,7 +363,8 @@ agentic-harness-research/
 │   ├── ridge-spec-001.md         # full Ridge MAS spec (source of truth for Task 1)
 │   ├── ridge-product-v1.md       # current Ridge README
 │   ├── research-requirements.md  # extra requirements from the team call
-│   └── RESEARCH_PLAN.md          # synthesis, deadlines, VM sizing
+│   ├── RESEARCH_PLAN.md          # synthesis, deadlines, VM sizing
+│   └── agent-core-session-report.pdf  # session summary, timeline, VM tiers
 └── repos/                        # cloned reference harnesses (not committed)
 ```
 
