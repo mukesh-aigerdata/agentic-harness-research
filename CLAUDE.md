@@ -6,6 +6,48 @@ Last updated: 2026-11-03.
 
 ---
 
+## 0. Start here — current status (read first every session)
+
+**Phase:** W1 (research) of the 7-week plan in §11. Research is done. Building has not started. No `agent-core` code exists yet.
+
+### Done so far (session 1, 2026-11-03)
+
+1. Saved the Ridge spec, the Ridge README, and the team-call requirements in `docs/`.
+2. Cloned 5 reference harnesses into `repos/` and analysed them (§10).
+3. Web research: OKF v0.1, ACE paper, small rerankers, self-hosted sandboxes.
+4. Wrote this file, `docs/RESEARCH_PLAN.md`, and `docs/agent-core-session-report.pdf`.
+5. Agreed VM tiers (§11). The user rejected large VMs: LLMs run on APIs, so size only for builds, tests, and sandboxes.
+6. Pushed to GitHub `main`: `29c798b`, `57fd17a`, `6eb652d`, plus the commit that added this section.
+
+### Next actions (in order)
+
+1. Write ADRs in `docs/adr/` for: sandbox layer, session format, OKF lesson layout, ranking stages, role precedence.
+2. Build the eval set: ≥ 50 old Ridge / SCG-bot tickets with "which lesson would have helped" labels.
+3. Choose a VM provider. Order tier A. Check that tier B sizes offer `/dev/kvm`.
+4. Start W2 code: `WorktreeManager`, `SandboxManager`, `SessionManager` in `packages/agent-core/`.
+
+### Pending decisions (ask the user or team lead)
+
+- Who labels the eval set?
+- Which LLM providers and subscriptions do Workers use?
+- Confirm one OKF file per lesson (`.ridge/memory/lessons/<ticket-id>.md`) replaces `lessons.jsonl`.
+
+### Environment facts
+
+- Host: 4 vCPU, 15 GB RAM, only ~14 GB free disk (92% full). Docker is installed. No `gh` login.
+- `repos/` is git-ignored. On a fresh clone, restore it:
+  `cd repos && for r in deepseek-ai/dsh-superagent-prototype HarnessMD/munder-difflin NousResearch/hermes-agent badlogic/pi-mono sst/opencode; do git clone --depth 1 https://github.com/$r.git; done`
+- Rebuild the PDF: `python3 -m venv /tmp/v && /tmp/v/bin/pip install reportlab && /tmp/v/bin/python scripts/make_session_report_pdf.py docs/agent-core-session-report.pdf` (uses DejaVu fonts in `/usr/share/fonts/truetype/dejavu/`).
+- Pushing: the user pushes straight to `main`. There is no saved credential. Ask the user how to authenticate. Never write a token into a file, git config, or memory.
+
+### User preferences
+
+- Short, casual messages. Wants deliverables on GitHub (PDFs downloaded from the repo).
+- Push to `main` directly when asked.
+- Keep VM and cost estimates lean, with a reason for every number.
+
+---
+
 ## 1. Who we are and what this repo is
 
 - **Company:** Aigerdata. GitHub org: `Aigerdata`.
@@ -365,6 +407,8 @@ agentic-harness-research/
 │   ├── research-requirements.md  # extra requirements from the team call
 │   ├── RESEARCH_PLAN.md          # synthesis, deadlines, VM sizing
 │   └── agent-core-session-report.pdf  # session summary, timeline, VM tiers
+├── scripts/
+│   └── make_session_report_pdf.py  # regenerates the session report PDF
 └── repos/                        # cloned reference harnesses (not committed)
 ```
 
