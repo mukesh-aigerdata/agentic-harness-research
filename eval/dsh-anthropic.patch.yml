@@ -1,0 +1,12 @@
+# Overlay for `dsh --profile headless --patch <this file>`.
+# Routes DSH through its built-in pi-ai adapter to Anthropic. The key comes
+# from the ANTHROPIC_API_KEY env var at launch; no secret is stored here.
+- id: agent-default-model
+  config:
+    provider: anthropic
+    model: claude-sonnet-4-6
+- id: llm-pi-ai
+  config:
+    providers:
+      anthropic:
+        apiKeyEnv: ANTHROPIC_API_KEY

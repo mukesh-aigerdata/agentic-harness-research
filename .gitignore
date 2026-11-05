@@ -1,1 +1,7 @@
 repos/
+micro-eval/
+eval-logs/
+.env
+scg-cash-management/
+eval-worktrees/
+.venv-pdf/
