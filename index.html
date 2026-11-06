@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aigerdata Harness Leaderboard</title>
+<meta name="description" content="Aigerdata internal leaderboard: which open-source coding-agent harness should run our Workers. Real backlog tickets, hidden tests, full regression replay.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F5F5F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0B0D12" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='3,28 10,12 17,28' fill='%231A2759'/%3E%3Cpolygon points='10,28 17,5 24,28' fill='%231A2759'/%3E%3Cpolygon points='19,28 24,15 29,28' fill='%231A2759'/%3E%3Cpolygon points='15,5 19,5 17,1' fill='%23D84727'/%3E%3C/svg%3E">
+<script>
+  // Apply the saved theme before first paint (no flash).
+  try { var t = localStorage.getItem('lb-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="masthead" id="masthead">
+  <div class="wrap masthead-row">
+    <a class="brand" href="#top" aria-label="Aiger Data leaderboard, back to top">
+      <svg class="brand-mark" viewBox="0 0 300 140" width="36" height="17" aria-hidden="true"><path class="ridge" d="M0 130 L55 62 L90 96 L150 20 L210 82 L245 47 L300 130 Z"/><polygon class="flag" points="142,18 158,18 150,4"/></svg>
+      <span class="brand-name">Aiger Data</span>
+      <span class="badge-internal">Internal</span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#board">Leaderboard</a>
+      <a href="#frontier">Frontier</a>
+      <a href="#matrix">Tasks × harness</a>
+      <a href="#reliability">Reliability</a>
+      <a href="#tasks">Task set</a>
+      <a href="#method">Method</a>
+    </nav>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Switch theme">
+      <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="main">
+  <!-- Hero ------------------------------------------------------------- -->
+  <section class="hero" id="top">
+    <canvas id="terrain" aria-hidden="true"></canvas>
+    <div class="hero-veil" aria-hidden="true"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="dot-live" aria-hidden="true"></span>Aigerdata internal leaderboard · <span id="edition"></span></p>
+        <h1 class="display">Which coding-agent harness should run our <span class="hl">Workers</span>?</h1>
+        <p class="lede">Three open-source harnesses. Real tickets from our own backlog. One shared plan, the same Claude models, hidden tests from the merged fix, and a full regression replay of every patch.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#board">View the leaderboard</a>
+          <a class="btn btn-ghost" href="#method">How we test</a>
+        </div>
+        <p class="hero-meta mono" id="hero-meta"></p>
+      </div>
+      <aside class="podium" id="podium" aria-label="Current leader"></aside>
+    </div>
+  </section>
+
+  <!-- KPI strip -------------------------------------------------------- -->
+  <section class="wrap" aria-label="Run totals"><div class="kpis" id="kpis"></div></section>
+
+  <!-- Filters (sticky) ------------------------------------------------- -->
+  <div class="filters-bar" id="filters">
+    <div class="wrap filters-row">
+      <div class="chip-group" role="radiogroup" aria-label="Task set" id="f-set"></div>
+      <div class="chip-group" role="radiogroup" aria-label="Ticket kind" id="f-kind"></div>
+      <p class="filters-note mono" id="f-note"></p>
+    </div>
+  </div>
+
+  <!-- 01 Leaderboard ---------------------------------------------------- -->
+  <section class="wrap section reveal" id="board">
+    <header class="section-head">
+      <p class="index mono">01 / 07 · Leaderboard</p>
+      <h2 class="display-2" id="board-headline"></h2>
+      <p class="section-sub">Rank = solve rate, then total cost. Click a column to sort and a row to see its tasks. A tinted cell is the best value in its column. Bars show the solve rate; the thin whisker is the 95% Wilson interval.</p>
+    </header>
+    <div class="card table-card">
+      <div class="table-wrap"><table class="lb" id="lb-table"></table></div>
+      <div class="lb-cards" id="lb-cards"></div>
+    </div>
+    <p class="footnote" id="board-foot"></p>
+  </section>
+
+  <!-- 02 Frontier -------------------------------------------------------- -->
+  <section class="wrap section reveal" id="frontier">
+    <header class="section-head">
+      <p class="index mono">02 / 07 · Accuracy vs. effort</p>
+      <h2 class="display-2" id="frontier-headline"></h2>
+      <p class="section-sub">Each dot is one harness on the same tasks. Up and to the left is better. The line is the Pareto frontier: harnesses that no other harness beats on both axes. The shaded area is dominated.</p>
+    </header>
+    <div class="card chart-card">
+      <div class="chart-tools">
+        <span class="tool-label mono">X axis</span>
+        <div class="chip-group small" role="radiogroup" aria-label="X axis" id="f-x"></div>
+      </div>
+      <div class="chart-box" id="scatter"></div>
+      <div class="legend" id="scatter-legend"></div>
+    </div>
+  </section>
+
+  <!-- 03 Matrix ---------------------------------------------------------- -->
+  <section class="wrap section reveal" id="matrix">
+    <header class="section-head">
+      <p class="index mono">03 / 07 · Tasks × harness</p>
+      <h2 class="display-2" id="matrix-headline"></h2>
+      <p class="section-sub">One cell per graded job. Switch the cell metric to compare effort on the same task. Click a cell for the turn-by-turn record.</p>
+    </header>
+    <div class="card">
+      <div class="chart-tools">
+        <span class="tool-label mono">Cell shows</span>
+        <div class="chip-group small" role="radiogroup" aria-label="Cell metric" id="f-cell"></div>
+      </div>
+      <div class="matrix" id="matrix-grid"></div>
+      <div class="legend" id="matrix-legend"></div>
+    </div>
+  </section>
+
+  <!-- 04 Economics -------------------------------------------------------- -->
+  <section class="wrap section reveal" id="economics">
+    <header class="section-head">
+      <p class="index mono">04 / 07 · Economics</p>
+      <h2 class="display-2" id="econ-headline"></h2>
+      <p class="section-sub">Cost is token count × list price for each model. Cache reads are cheap per token but dominate volume, so the token mix explains most of the cost gap.</p>
+    </header>
+    <div class="grid-2">
+      <div class="card">
+        <h3 class="card-title">Cost per task</h3>
+        <p class="card-sub">US dollars per graded job, both turns included.</p>
+        <div class="chart-box" id="cost-bars"></div>
+        <div class="legend" id="cost-legend"></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">Where the tokens go</h3>
+        <p class="card-sub">Bar length = total tokens. Segments = token type.</p>
+        <div id="token-mix"></div>
+        <div class="legend" id="token-legend"></div>
+        <div class="per-call" id="per-call"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Reliability ------------------------------------------------------ -->
+  <section class="wrap section reveal" id="reliability">
+    <header class="section-head">
+      <p class="index mono">05 / 07 · Reliability</p>
+      <h2 class="display-2" id="rel-headline"></h2>
+      <p class="section-sub">Did the harness choice change the outcome, or only the cost? Did the second turn help? Did any patch break something the hidden tests do not cover?</p>
+    </header>
+    <div class="grid-3">
+      <div class="card">
+        <h3 class="card-title">Outcome agreement</h3>
+        <p class="card-sub">Per task: did all three harnesses reach the same result?</p>
+        <div id="agreement"></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">Turn 2: retry with feedback</h3>
+        <p class="card-sub">Failed jobs get one retry with the failing checks.</p>
+        <div id="turn2"></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">Full regression replay</h3>
+        <p class="card-sub">Every final patch, re-run against both test suites, the build, and the type check.</p>
+        <div id="replay"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 Task set ---------------------------------------------------------- -->
+  <section class="wrap section reveal" id="tasks">
+    <header class="section-head">
+      <p class="index mono">06 / 07 · Task set</p>
+      <h2 class="display-2">Real tickets, closed by our team, with the merged fix as the answer key.</h2>
+      <p class="section-sub" id="tasks-sub"></p>
+    </header>
+    <div class="task-grid" id="task-grid"></div>
+  </section>
+
+  <!-- 07 Method ------------------------------------------------------------ -->
+  <section class="wrap section reveal" id="method">
+    <header class="section-head">
+      <p class="index mono">07 / 07 · Method</p>
+      <h2 class="display-2">Same plan, same model, same sandbox. Only the harness changes.</h2>
+    </header>
+    <ol class="pipeline" id="pipeline"></ol>
+    <div class="grid-2 method-grid">
+      <div class="card">
+        <h3 class="card-title">What counts as a pass</h3>
+        <ul class="checklist" id="pass-rules"></ul>
+      </div>
+      <div class="card">
+        <h3 class="card-title">Fairness and isolation</h3>
+        <ul class="checklist" id="fairness"></ul>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="card-title">Metrics we record</h3>
+      <dl class="metric-list" id="metric-list"></dl>
+    </div>
+    <div class="grid-2 method-grid">
+      <div class="card">
+        <h3 class="card-title">Harnesses under test</h3>
+        <div id="harness-list"></div>
+      </div>
+      <div class="card">
+        <h3 class="card-title">Limits of this edition</h3>
+        <ul class="checklist warn" id="limits"></ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-row">
+    <div class="footer-brand">
+      <svg class="brand-mark" viewBox="0 0 300 140" width="44" height="21" aria-hidden="true"><path class="ridge" d="M0 130 L55 62 L90 96 L150 20 L210 82 L245 47 L300 130 Z"/><polygon class="flag" points="142,18 158,18 150,4"/></svg>
+      <div>
+        <p class="brand-name">Aiger Data</p>
+        <p class="footer-tag">Internal research · not for external distribution</p>
+      </div>
+    </div>
+    <p class="footer-meta mono" id="footer-meta"></p>
+    <p class="footer-fine">Harness logos are trademarks of their owners and identify each harness only. Ticket text, repository names, and file paths are withheld on purpose.</p>
+  </div>
+</footer>
+
+<!-- Detail drawer -->
+<div class="drawer-backdrop" id="drawer-backdrop" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+  <button class="drawer-close" id="drawer-close" type="button" aria-label="Close details">×</button>
+  <div id="drawer-body"></div>
+</aside>
+
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
